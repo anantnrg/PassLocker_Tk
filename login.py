@@ -60,8 +60,22 @@ class Login(Frame):
         login = ttk.Button(self, text="Login",command=validate)
         login.place(x=220, y=130)
 
-        def db_validate():
-            print("validated")
+
+def db_validate():
+    conn = sqlite3.connect('db/db.db')
+    c = conn.cursor()
+
+    def create_table():
+        c.execute('CREATE TABLE IF NOT EXISTS master_login(usr TEXT, password TEXT)')
+
+    def data_entry():
+        c.execute("INSERT INTO master_login VALUES('anantnrg', 'password')")
+        conn.commit()
+        c.close()
+        conn.close()
+
+    create_table()
+    data_entry()
 
 
 root = Tk()
