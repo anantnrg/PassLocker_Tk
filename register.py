@@ -1,5 +1,7 @@
 from tkinter import *
 from tkinter import ttk
+from tkinter import messagebox
+import sqlite3
 
 
 class Register(Frame):
@@ -10,7 +12,7 @@ class Register(Frame):
         self.init_window()
 
     def init_window(self):
-        self.Main.title("Register - PassLocker v3.0")
+        self.Main.title("Set Master Password - PassLocker v3.0")
         self.Main.iconbitmap(r'login.ico')
         self.pack(fill=BOTH, expand=1)
 
@@ -19,56 +21,49 @@ class Register(Frame):
 
         # Functions
         def btn_register_click():
-            print(rb_value.get())
-            print(txtbox_name.get())
-            print(txtbox_usrname.get())
-            print(txtbox_email.get())
-            print(txtbox_passwd.get())
-            self.quit()
+            if len(txtbox_passwd.get()) == 0:
+                messagebox.showerror(title="Error!", message="No Master Password provided. Please "
+                                                             "provide a New Master Password")
+                txtbox_passwd.focus()
+            else:
 
-        # Fixing Fonts
-        style = ttk.Style(root)
-        style.configure("TRadiobutton", font=('Ubuntu', 12))
-        btn_style = ttk.Style(root)
-        btn_style.configure("TButton", font=('Ubuntu', 12))
+                save_to_db()
+                self.quit()
 
         # Labels
-        lbl_name = Label(root, text='Name', font=('Ubuntu', 14))
-        lbl_name.place(x=80, y=40)
-        lbl_email = Label(root, text='Email Address', font=('Ubuntu', 14))
-        lbl_email.place(x=80, y=100)
-        lbl_usrname = Label(root, text='User Name', font=('Ubuntu', 14))
-        lbl_usrname.place(x=80, y=160)
-        lbl_passwd = Label(root, text='Master Password', font=('Ubuntu', 14))
-        lbl_passwd.place(x=80, y=220)
+        lbl_passwd = Label(root, text='New Master Password', font=('Ubuntu', 14))
+        lbl_passwd.place(x=40, y=40)
 
         # Text Boxes
-        txtbox_name = ttk.Entry(root, font=('Ubuntu', 14))
-        txtbox_name.place(x=240, y=40)
-        txtbox_email = ttk.Entry(root, font=('Ubuntu', 14))
-        txtbox_email.place(x=240, y=100)
-        txtbox_usrname = ttk.Entry(root, font=('Ubuntu', 14))
-        txtbox_usrname.place(x=240, y=160)
         txtbox_passwd = ttk.Entry(root, font=('Ubuntu', 14), show=passwd_txt)
-        txtbox_passwd.place(x=240, y=220)
-
-        # Check Boxes
-        rb_value = StringVar()
-        set_given_email_as_default_for_entries = ttk.Radiobutton(root, text='Use the given email address as default '
-                                                                            'email for all entries', style='TRadiobutton', value='use_given_email_for_all_entries', variable=rb_value)
-        set_given_email_as_default_for_entries.place(x=60, y=280)
-        use_different_email_for_different_entries = ttk.Radiobutton(root, text='Use different email addresses for '
-                                                                               'different entries', style='TRadiobutton', value='do_not_use_given_email_for_all_entries', variable=rb_value)
-        use_different_email_for_different_entries.place(x=60, y=310)
+        txtbox_passwd.place(x=280, y=40)
 
         # Buttons
-        btn_cancel = ttk.Button(root, text="Cancel", style='TButton', command=root.quit)
-        btn_cancel.place(x=120, y=380)
-        btn_register = ttk.Button(root, text="Register", style='TButton', command=btn_register_click)
-        btn_register.place(x=320, y=380)
+        btn_cancel = ttk.Button(root, text="Cancel", command=root.quit)
+        btn_cancel.place(x=120, y=120)
+        btn_register = ttk.Button(root, text="Register", command=btn_register_click)
+        btn_register.place(x=320, y=120)
+
+        def save_to_db():
+            conn = sqlite3.connect('db/db.db')
+            c = conn.cursor()
+
+            def create_table():
+                c.execute('CREATE TABLE IF NOT EXISTS master_login(master_password TEXT)')
+
+            def data_entry():
+                passwd = str(txtbox_passwd.get())
+                c.execute("SELECT * FROM master_login LIMIT 1")
+                c.execute("UPDATE master_login SET master_password  = (?) ", (passwd,))
+                conn.commit()
+                c.close()
+                conn.close()
+
+            create_table()
+            data_entry()
 
 
 root = Tk()
-root.geometry("550x440")
+root.geometry("560x200")
 app = Register(root)
 root.mainloop()

@@ -1,7 +1,7 @@
 import sqlite3
-import login
-import main
+from register import passwd
 
+print(passwd)
 conn = sqlite3.connect('db/db.db')
 c = conn.cursor()
 

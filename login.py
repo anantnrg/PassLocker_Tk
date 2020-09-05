@@ -24,15 +24,6 @@ class Login(Frame):
             self.quit()
 
         def validate():
-            usr = txtbox_usr.get()
-            passwd = txtbox_passwd.get()
-            if len(txtbox_usr.get()) == 0:
-                messagebox.showerror(title="Error!", message="No User Name provided. Please "
-                                                             "provide a User Name and Password to login to PassLocker")
-                txtbox_usr.focus()
-            else:
-                pass
-
             if len(txtbox_passwd.get()) == 0:
                 messagebox.showerror(title="Error!", message="No Password provided. Please "
                                                              "provide a User Name and Password to login to PassLocker")
@@ -42,40 +33,36 @@ class Login(Frame):
                 db_validate()
 
         # Labels
-        lbl_usr = ttk.Label(font='Ubuntu', text='User Name')
-        lbl_usr.place(x=50, y=30)
         lbl_passwd = ttk.Label(font='Ubuntu', text='Password')
-        lbl_passwd.place(x=50, y=70)
+        lbl_passwd.place(x=50, y=30)
 
         # Textboxes
-        txtbox_usr = ttk.Entry(font='Ubuntu')
-        txtbox_usr.place(x=150, y=30)
-        txtbox_usr.focus()
-        txtbox_passwd = ttk.Entry(font='Ubuntu',show=passwd_text)
-        txtbox_passwd.place(x=150, y=70)
+        txtbox_passwd = ttk.Entry(font='Ubuntu', show=passwd_text)
+        txtbox_passwd.place(x=150, y=30)
+        txtbox_passwd.focus()
 
         # Buttons
-        cancel = ttk.Button(self, text="Cancel",command=root.destroy)
+        cancel = ttk.Button(self, text="Cancel", command=root.destroy)
         cancel.place(x=90, y=130)
-        login = ttk.Button(self, text="Login",command=validate)
+        login = ttk.Button(self, text="Login", command=validate)
         login.place(x=220, y=130)
 
+        def db_validate():
+            conn = sqlite3.connect('db/db.db')
+            c = conn.cursor()
 
-def db_validate():
-    conn = sqlite3.connect('db/db.db')
-    c = conn.cursor()
+            def select_passwd_from_db():
+                passwd = str(txtbox_passwd.get())
+                c.execute('SELECT master_password FROM master_login')
+                for row in c.fetchone():
+                    passwd_in_db = row
+                if passwd == passwd_in_db:
+                    print("Verified")
+                    self.quit()
+                else:
+                    print("incorrect")
 
-    def create_table():
-        c.execute('CREATE TABLE IF NOT EXISTS master_login(usr TEXT, password TEXT)')
-
-    def data_entry():
-        c.execute("INSERT INTO master_login VALUES('anantnrg', 'password')")
-        conn.commit()
-        c.close()
-        conn.close()
-
-    create_table()
-    data_entry()
+            select_passwd_from_db()
 
 
 root = Tk()
